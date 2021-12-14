@@ -18,8 +18,9 @@ type config struct {
 // Define an application struct to hold the dependencies for our HTTP handlers,
 // helpers, and middleware. Also useful for testing.
 type application struct {
-	config config
-	logger *log.Logger
+	config   config
+	errorLog *log.Logger
+	infoLog  *log.Logger
 }
 
 func main() {
@@ -33,14 +34,14 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.Parse()
 
-	// Initialize a new logger which writes messages to the standard out stream,
-	// prefixed with the current date and time.
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	// Our applicaiton struct: used for passing dependencies around neatly.
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:   cfg,
+		errorLog: errorLog,
+		infoLog:  infoLog,
 	}
 
 	// Declare an initial servermux, with our homepage.
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	// Start the HTTP server.
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
+	infoLog.Printf("Starting server on %d", app.config.port)
 	err := srv.ListenAndServe()
-	logger.Fatal(err)
+	errorLog.Fatal(err)
 }

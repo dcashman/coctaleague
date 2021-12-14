@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"text/template"
 )
@@ -22,7 +21,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 
 	if err != nil {
-		log.Println(err.Error())
+		app.serverError(w, err)
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
@@ -31,7 +30,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// data, which isn't (yet) needed.
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
+		app.serverError(w, err)
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
