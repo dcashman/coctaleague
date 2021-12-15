@@ -5,7 +5,21 @@ Attempt at putting the fantasy football bidding war draft into a real applicatio
 <h3> Prerequisites </h3>
 <li> Install <a href = "https://go.dev/doc/install"> Go </a> </li>
 <li> Install <a href = "https://www.postgresql.org/"> postgresql </a> </li>
-
+<h4> Setup MarketDraft DB </h4>
+Connect to the database as the postgres:<br/>
+<code>sudo -u postgres psql</code><br/>
+<br/>
+Create the marketdraft DB and connect to it. <br/>
+<code>CREATE DATABASE marketdraft;</code><br/>
+<code>\c marketdraft;</code><br/>
+<br/>
+Create a ROLE for the application to connect to the DB, replaceing pa55word with your custom password.<br/>
+<code>CREATE ROLE greenlight WITH LOGIN PASSWORD 'pa55word';</code><br/>
+<br/>
+Add the citext extension and exit.<br/>
+<code>CREATE EXTENSION IF NOT EXISTS citext;</code><br/>
+<code>exit;</code><br/>
+<br/>
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
 <li> 2) Visit localhost:4000 on a browser on the dev machine. </li>
