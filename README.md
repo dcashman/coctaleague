@@ -20,6 +20,12 @@ Add the citext extension and exit.<br/>
 <code>CREATE EXTENSION IF NOT EXISTS citext;</code><br/>
 <code>exit;</code><br/>
 <br/>
+Create an environment variable containing the password you created to allow for
+local development on your postgresql db, without sharing credentials in source
+control.<br/>
+<code> export MARKETDRAFT_DB_DSN='postgres://marketdraft:pa55word@localhost/ma\
+rketdraft?sslmode=disable;'</code><br/>
+<br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
 <h3> Running </h3>
