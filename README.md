@@ -28,6 +28,9 @@ rketdraft?sslmode=disable;'</code><br/>
 <br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
+<br/>
+Install the go module for creating composable middleware routines.<br/>
+<code> go get github.com/justinas/alice@v1 </code><br/>
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
 <li> 2) Visit localhost:4000 on a browser on the dev machine. </li>
