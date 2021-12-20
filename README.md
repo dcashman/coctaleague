@@ -28,6 +28,14 @@ control.<br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
 <br/>
+<h4> Setup TLS </h4>
+Create dev key and cert in special (hard-coded and ignored by git) tls dir.
+<code>mkdir tls</code><br/>
+<code>cd  tls</code><br/>
+<code>go run /usr/local/go/src/crypto/tls/generate_cert.go --ecdsa-curve="P256" --host=localhost</code><br/>
+<code>cd ..</code><br/>
+<br/>
+<h4> Misc setup </h4>
 Install the go module for creating composable middleware routines.<br/>
 <code> go get github.com/justinas/alice@v1 </code><br/>
 <h3> Running </h3>
