@@ -29,7 +29,7 @@ Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
 <br/>
 <h4> Setup TLS </h4>
-Create dev key and cert in special (hard-coded and ignored by git) tls dir.
+Create dev key and cert in special (hard-coded and ignored by git) tls dir.<br/>
 <code>mkdir tls</code><br/>
 <code>cd  tls</code><br/>
 <code>go run /usr/local/go/src/crypto/tls/generate_cert.go --ecdsa-curve="P256" --host=localhost</code><br/>
