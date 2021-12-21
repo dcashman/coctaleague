@@ -3,18 +3,17 @@ package main
 import (
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
+	router := httprouter.New()
+	router.ServeFiles("/static/*filepath", http.Dir("./ui/static"))
+	router.HandlerFunc(http.MethodGet, "/", app.home)
+
 	// Middleware for every request - 'standard'.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	return standardMiddleware.Then(mux)
+	return standardMiddleware.Then(router)
 }

@@ -38,6 +38,9 @@ Create dev key and cert in special (hard-coded and ignored by git) tls dir.<br/>
 <h4> Misc setup </h4>
 Install the go module for creating composable middleware routines.<br/>
 <code> go get github.com/justinas/alice@v1 </code><br/>
+<br/>
+Install the routing package for our endpoints.<br/>
+<code> go get github.com/julienschmidt/httprouter@v1.3.0</code><br/>
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
 <li> 2) Visit localhost:4000 on a browser on the dev machine. </li>
