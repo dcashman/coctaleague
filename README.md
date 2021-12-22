@@ -41,6 +41,13 @@ Install the go module for creating composable middleware routines.<br/>
 <br/>
 Install the routing package for our endpoints.<br/>
 <code> go get github.com/julienschmidt/httprouter@v1.3.0</code><br/>
+<br/>
+Install the sessions package to keep state across requests.<br/>
+<code>go get github.com/golangcollege/sessions@v1</code><br/>
+<br/>
+Create a new env variable to store your session secret key.<br/>
+<code>openssl rand 32 -base64</code><br/>
+<code>export MARKETDRAFT_SESSION_KEY='32 bytes of base64 output from above cmd'</code><br/>
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
 <li> 2) Visit localhost:4000 on a browser on the dev machine. </li>

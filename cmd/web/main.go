@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"database/sql"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -14,6 +15,7 @@ import (
 	// Import the pq driver so that it can register itself with the database/sql
 	// package. Note that we alias this import to the blank identifier, to stop the Go
 	// compiler complaining that the package isn't being used.
+	"github.com/golangcollege/sessions"
 	_ "github.com/lib/pq"
 )
 
@@ -32,6 +34,7 @@ type application struct {
 	config   config
 	errorLog *log.Logger
 	infoLog  *log.Logger
+	session  *sessions.Session
 }
 
 func main() {
@@ -44,6 +47,11 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "Server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("MARKETDRAFT_DB_DSN"), "PostgreSQL DSN")
+
+	// TODO: Replace this with proper secret management. See, e.g.
+	// https://martinfowler.com/articles/session-secret.html#Prevention
+	secret := flag.String("secret", os.Getenv("MARKETDRAFT_SESSION_KEY"), "Session secret key")
+
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -57,11 +65,20 @@ func main() {
 	defer db.Close()
 	infoLog.Printf("database connection pool established")
 
+	sBytes, err := base64.StdEncoding.DecodeString(*secret)
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	session := sessions.New(sBytes)
+	session.Lifetime = 12 * time.Hour
+	session.Secure = true
+
 	// Our applicaiton struct: used for passing dependencies around neatly.
 	app := &application{
 		config:   cfg,
 		errorLog: errorLog,
 		infoLog:  infoLog,
+		session:  session,
 	}
 
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want

@@ -8,9 +8,12 @@ import (
 )
 
 func (app *application) routes() http.Handler {
+
+	dynamicMiddleware := alice.New(app.session.Enable)
+
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath", http.Dir("./ui/static"))
-	router.HandlerFunc(http.MethodGet, "/", app.home)
+	router.Handler(http.MethodGet, "/", dynamicMiddleware.ThenFunc(app.home))
 
 	// Middleware for every request - 'standard'.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
