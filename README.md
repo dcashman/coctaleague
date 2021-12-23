@@ -5,6 +5,7 @@ Attempt at putting the fantasy football bidding war draft into a real applicatio
 <h3> Prerequisites </h3>
 <li> Install <a href = "https://go.dev/doc/install"> Go </a> </li>
 <li> Install <a href = "https://www.postgresql.org/"> postgresql </a> </li>
+<li> Install <a href = "https://github.com/golang-migrate/migrate"> migrate </a></li>
 <h4> Setup MarketDraft DB </h4>
 Connect to the database as the postgres:<br/>
 <code>sudo -u postgres psql</code><br/>

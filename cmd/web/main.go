@@ -12,10 +12,12 @@ import (
 	"os"
 	"time"
 
+	"dcashman.net/marketdraft/pkg/models/postgresql"
+	"github.com/golangcollege/sessions"
+
 	// Import the pq driver so that it can register itself with the database/sql
 	// package. Note that we alias this import to the blank identifier, to stop the Go
 	// compiler complaining that the package isn't being used.
-	"github.com/golangcollege/sessions"
 	_ "github.com/lib/pq"
 )
 
@@ -35,6 +37,7 @@ type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
 	session  *sessions.Session
+	users    *postgresql.UserModel
 }
 
 func main() {
@@ -79,6 +82,7 @@ func main() {
 		errorLog: errorLog,
 		infoLog:  infoLog,
 		session:  session,
+		users:    &postgresql.UserModel{DB: db},
 	}
 
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want

@@ -15,6 +15,12 @@ func (app *application) routes() http.Handler {
 	router.ServeFiles("/static/*filepath", http.Dir("./ui/static"))
 	router.Handler(http.MethodGet, "/", dynamicMiddleware.ThenFunc(app.home))
 
+	router.Handler(http.MethodGet, "/user/signup", dynamicMiddleware.ThenFunc(app.signupUserForm))
+	router.Handler(http.MethodPost, "/user/signup", dynamicMiddleware.ThenFunc(app.signupUser))
+	router.Handler(http.MethodGet, "/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
+	router.Handler(http.MethodPost, "/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
+	router.Handler(http.MethodPost, "/user/logout", dynamicMiddleware.ThenFunc(app.logoutUser))
+
 	// Middleware for every request - 'standard'.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
