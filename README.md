@@ -51,4 +51,4 @@ Create a new env variable to store your session secret key.<br/>
 <code>export MARKETDRAFT_SESSION_KEY='32 bytes of base64 output from above cmd'</code><br/>
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
-<li> 2) Visit localhost:4000 on a browser on the dev machine. </li>
+<li> 2) Visit https://localhost:4000 on a browser on the dev machine. </li>
