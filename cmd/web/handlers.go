@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"text/template"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -12,28 +11,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// UI templates which need to be composed.
-	files := []string{
-		"./ui/html/home.page.tmpl",
-		"./ui/html/base.layout.tmpl",
-		"./ui/html/footer.partial.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-
-	if err != nil {
-		app.serverError(w, err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-
-	// Compose templates and write to the response. Second parameter is dynamic
-	// data, which isn't (yet) needed.
-	err = ts.Execute(w, nil)
-	if err != nil {
-		app.serverError(w, err)
-		http.Error(w, "Internal Server Error", 500)
-	}
+	app.render(w, r, "home.page.tmpl", nil)
 }
 
 func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -33,11 +34,12 @@ type config struct {
 // Define an application struct to hold the dependencies for our HTTP handlers,
 // helpers, and middleware. Also useful for testing.
 type application struct {
-	config   config
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	session  *sessions.Session
-	users    *postgresql.UserModel
+	config        config
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	session       *sessions.Session
+	templateCache map[string]*template.Template
+	users         *postgresql.UserModel
 }
 
 func main() {
@@ -76,13 +78,20 @@ func main() {
 	session.Lifetime = 12 * time.Hour
 	session.Secure = true
 
+	// Initialize a new template cache...
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Our applicaiton struct: used for passing dependencies around neatly.
 	app := &application{
-		config:   cfg,
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		session:  session,
-		users:    &postgresql.UserModel{DB: db},
+		config:        cfg,
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		session:       session,
+		templateCache: templateCache,
+		users:         &postgresql.UserModel{DB: db},
 	}
 
 	// Initialize a tls.Config struct to hold the non-default TLS settings we want
