@@ -3,11 +3,14 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+
+	"dcashman.net/marketdraft/pkg/forms"
 )
 
 // Define a templateData type to act as the holding structure for
 // any dynamic data that we want to pass to our HTML templates (currently empty).
 type templateData struct {
+	Form *forms.Form
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
