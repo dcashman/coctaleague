@@ -46,6 +46,12 @@ Install the routing package for our endpoints.<br/>
 Install the sessions package to keep state across requests.<br/>
 <code>go get github.com/golangcollege/sessions@v1</code><br/>
 <br/>
+Install the latest bcrypt package for password hashing.<br/>
+<code>go get golang.org/x/crypto/bcrypt@latest</code><br/>
+<br/>
+Install the nosurf package to help prevent CSRF<br/>
+<code>go get github.com/justinas/nosurf@v1</code><br/>
+<br/>
 Create a new env variable to store your session secret key.<br/>
 <code>openssl rand 32 -base64</code><br/>
 <code>export MARKETDRAFT_SESSION_KEY='32 bytes of base64 output from above cmd'</code><br/>

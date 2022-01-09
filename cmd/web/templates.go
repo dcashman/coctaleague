@@ -10,7 +10,10 @@ import (
 // Define a templateData type to act as the holding structure for
 // any dynamic data that we want to pass to our HTML templates (currently empty).
 type templateData struct {
-	Form *forms.Form
+	CSRFToken       string
+	Flash           string
+	Form            *forms.Form
+	IsAuthenticated bool
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

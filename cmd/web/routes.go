@@ -9,7 +9,7 @@ import (
 
 func (app *application) routes() http.Handler {
 
-	dynamicMiddleware := alice.New(app.session.Enable)
+	dynamicMiddleware := alice.New(app.session.Enable, noSurf)
 
 	router := httprouter.New()
 	router.ServeFiles("/static/*filepath", http.Dir("./ui/static"))
@@ -19,7 +19,7 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodPost, "/user/signup", dynamicMiddleware.ThenFunc(app.signupUser))
 	router.Handler(http.MethodGet, "/user/login", dynamicMiddleware.ThenFunc(app.loginUserForm))
 	router.Handler(http.MethodPost, "/user/login", dynamicMiddleware.ThenFunc(app.loginUser))
-	router.Handler(http.MethodPost, "/user/logout", dynamicMiddleware.ThenFunc(app.logoutUser))
+	router.Handler(http.MethodPost, "/user/logout", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.logoutUser))
 
 	// Middleware for every request - 'standard'.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
