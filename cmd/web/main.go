@@ -22,6 +22,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type contextKey string
+
+const contextKeyIsAuthenticated = contextKey("isAuthenticated")
+
 // Define a config struct to hold all the configuration settings for our application.
 type config struct {
 	port int    // Network port on which to listen.
