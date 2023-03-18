@@ -7,7 +7,7 @@ Attempt at putting the fantasy football bidding war draft into a real applicatio
 <li> Install <a href = "https://www.postgresql.org/"> postgresql </a> </li>
 <li> Install <a href = "https://github.com/golang-migrate/migrate"> migrate </a></li>
 <h4> Setup MarketDraft DB </h4>
-Connect to the database as the postgres:<br/>
+Connect to the database as the postgres superuser for your system, e.g. postgres, or dcashman:<br/>
 <code>sudo -u postgres psql</code><br/>
 <br/>
 Create the marketdraft DB and connect to it. <br/>
@@ -24,7 +24,7 @@ Add the citext extension and exit.<br/>
 Create an environment variable containing the password you created to allow for
 local development on your postgresql db, without sharing credentials in source
 control.<br/>
-<code> export MARKETDRAFT_DB_DSN='postgres://marketdraft:pa55word@localhost/marketdraft?sslmode=disable;'</code><br/>
+<code> export MARKETDRAFT_DB_DSN='postgres://marketdraft:pa55word@localhost/marketdraft?sslmode=disable'</code><br/>
 <br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
