@@ -93,7 +93,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		// (invalid) authenticatedUserID value from their session and call the next
 		// handler in the chain as normal.
 		user, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
-		if errors.Is(err, models.ErrNoRecord) || !user.Active {
+		if user != nil && (errors.Is(err, models.ErrNoRecord) || !user.Active) {
 			app.session.Remove(r, "authenticatedUserID")
 			next.ServeHTTP(w, r)
 			return
