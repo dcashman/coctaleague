@@ -15,7 +15,7 @@ Create the marketdraft DB and connect to it. <br/>
 <code>\c marketdraft;</code><br/>
 <br/>
 Create a ROLE for the application to connect to the DB, replaceing pa55word with your custom password.<br/>
-<code>CREATE ROLE greenlight WITH LOGIN PASSWORD 'pa55word';</code><br/>
+<code>CREATE ROLE coctaleague WITH LOGIN PASSWORD 'pa55word';</code><br/>
 <br/>
 Add the citext extension and exit.<br/>
 <code>CREATE EXTENSION IF NOT EXISTS citext;</code><br/>
