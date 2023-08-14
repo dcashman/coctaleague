@@ -20,3 +20,19 @@ type User struct {
 	Created        time.Time
 	Active         bool
 }
+
+// Type representing seasons in our table.
+type Season struct {
+	ID    int
+	Year  int
+	Funds int
+}
+
+// Type representing teams in our table.
+type Team struct {
+	ID                  int
+	Name                string
+	Owner               int
+	Season              int
+	SpreadsheetPosition int
+}
