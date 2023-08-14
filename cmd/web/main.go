@@ -55,11 +55,11 @@ func main() {
 	// corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 4000, "Server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("MARKETDRAFT_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("COCTALEAGUE_DB_DSN"), "PostgreSQL DSN")
 
 	// TODO: Replace this with proper secret management. See, e.g.
 	// https://martinfowler.com/articles/session-secret.html#Prevention
-	secret := flag.String("secret", os.Getenv("MARKETDRAFT_SESSION_KEY"), "Session secret key")
+	secret := flag.String("secret", os.Getenv("COCTALEAGUE_SESSION_KEY"), "Session secret key")
 
 	flag.Parse()
 

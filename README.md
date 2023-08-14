@@ -6,7 +6,7 @@ Attempt at putting the fantasy football bidding war draft into a real applicatio
 <li> Install <a href = "https://go.dev/doc/install"> Go </a> </li>
 <li> Install <a href = "https://www.postgresql.org/"> postgresql </a> </li>
 <li> Install <a href = "https://github.com/golang-migrate/migrate"> migrate </a></li>
-<h4> Setup MarketDraft DB </h4>
+<h4> Setup Coctaleague DB </h4>
 Connect to the database as the postgres superuser for your system, e.g. postgres, or dcashman:<br/>
 <code>sudo -u postgres psql</code><br/>
 <br/>
@@ -28,6 +28,11 @@ control.<br/>
 <br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
+Prepare the database for use by performing SQL migrations.<br/>
+Install golang-migrate, e.g. on Mac: <br/>
+<code>brew install golang-migrate</code><br/>
+And use it to run the migration to setup the table.<br/>
+<code>migrate -path=./migrations -database=$COCTALEAGUE_DB_DSN up</code><br/>
 <br/>
 <h4> Setup TLS </h4>
 Create dev key and cert in special (hard-coded and ignored by git) tls dir.<br/>
@@ -55,6 +60,8 @@ Install the nosurf package to help prevent CSRF<br/>
 Create a new env variable to store your session secret key.<br/>
 <code>openssl rand 32 -base64</code><br/>
 <code>export MARKETDRAFT_SESSION_KEY='32 bytes of base64 output from above cmd'</code><br/>
+<br/>
+
 <h3> Running </h3>
 <li> 1) At root of repository, run "go run ./cmd/web" </li>
 <li> 2) Visit https://localhost:4000 on a browser on the dev machine. </li>
