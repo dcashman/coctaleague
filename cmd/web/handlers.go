@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"dcashman.net/marketdraft/pkg/forms"
-	"dcashman.net/marketdraft/pkg/models"
+	"dcashman.net/coctaleague/pkg/forms"
+	"dcashman.net/coctaleague/pkg/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {

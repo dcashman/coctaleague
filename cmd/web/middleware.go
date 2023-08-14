@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"dcashman.net/marketdraft/pkg/models"
+	"dcashman.net/coctaleague/pkg/models"
 	"github.com/justinas/nosurf"
 )
 

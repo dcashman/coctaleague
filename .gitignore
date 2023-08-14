@@ -18,4 +18,8 @@
 ######################
 *~
 \#*\#
+
+# Secrets
 tls/
+credentials\.json
+token\.json

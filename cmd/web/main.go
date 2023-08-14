@@ -13,7 +13,7 @@ import (
 	"os"
 	"time"
 
-	"dcashman.net/marketdraft/pkg/models/postgresql"
+	"dcashman.net/coctaleague/pkg/models/postgresql"
 	"github.com/golangcollege/sessions"
 
 	// Import the pq driver so that it can register itself with the database/sql

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"dcashman.net/marketdraft/pkg/models"
+	"dcashman.net/coctaleague/pkg/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
