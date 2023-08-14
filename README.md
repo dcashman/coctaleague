@@ -28,6 +28,7 @@ control.<br/>
 <br/>
 Install the go module for interfacing with postgresql.<br/>
 <code> go get github.com/lib/pq@v1.10.0 </code><br/>
+<br />
 Prepare the database for use by performing SQL migrations.<br/>
 Install golang-migrate, e.g. on Mac: <br/>
 <code>brew install golang-migrate</code><br/>
