@@ -12,12 +12,12 @@ type SeasonModel struct {
 }
 
 // We'll use the Insert method to add a new record to the seasons table.
-func (m *SeasonModel) Insert(year, funds int) error {
+func (m *SeasonModel) Insert(name string, creator, year, funds int) error {
 
-	stmt := `INSERT INTO seasons (year, funds) VALUES($1, $2)`
+	stmt := `INSERT INTO seasons (name, creator, year, funds) VALUES($1, $2, $3, $4)`
 
 	// Use the Exec() method to insert the season details into the seasons table
-	_, err := m.DB.Exec(stmt, year, funds)
+	_, err := m.DB.Exec(stmt, name, creator, year, funds)
 	if err != nil {
 		return err
 	}
@@ -28,8 +28,8 @@ func (m *SeasonModel) Insert(year, funds int) error {
 func (m *SeasonModel) GetId(id int) (*models.Season, error) {
 	s := &models.Season{}
 
-	stmt := `SELECT id, year, funds, FROM seasons WHERE id = $1`
-	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Year, &s.Funds)
+	stmt := `SELECT id, name, creator, year, funds, FROM seasons WHERE id = $1`
+	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Name, &s.Creator, &s.Year, &s.Funds)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
@@ -41,11 +41,11 @@ func (m *SeasonModel) GetId(id int) (*models.Season, error) {
 	return s, nil
 }
 
-func (m *SeasonModel) Get(year int) (*models.Season, error) {
+func (m *SeasonModel) Get(name string, owner, year int) (*models.Season, error) {
 	s := &models.Season{}
 
-	stmt := `SELECT id, year, funds, FROM seasons WHERE year = $1`
-	err := m.DB.QueryRow(stmt, year).Scan(&s.ID, &s.Year, &s.Funds)
+	stmt := `SELECT id, name, creator, year, funds, FROM seasons WHERE name = $1 AND owner = $2 AND year = $3`
+	err := m.DB.QueryRow(stmt, name, owner, year).Scan(&s.ID, &s.Name, &s.Creator, &s.Year, &s.Funds)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord

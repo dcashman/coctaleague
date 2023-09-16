@@ -23,9 +23,11 @@ type User struct {
 
 // Type representing seasons in our table.
 type Season struct {
-	ID    int
-	Year  int
-	Funds int
+	ID      int
+	Name    string
+	Creator int
+	Year    int
+	Funds   int
 }
 
 // Type representing teams in our table.
