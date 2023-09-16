@@ -25,7 +25,7 @@ func (m *SeasonModel) Insert(name string, creator, year, funds int) error {
 	return nil
 }
 
-func (m *SeasonModel) GetId(id int) (*models.Season, error) {
+func (m *SeasonModel) GetFromId(id int) (*models.Season, error) {
 	s := &models.Season{}
 
 	stmt := `SELECT id, name, creator, year, funds, FROM seasons WHERE id = $1`

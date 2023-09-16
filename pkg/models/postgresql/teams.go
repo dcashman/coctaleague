@@ -25,11 +25,27 @@ func (m *TeamModel) Insert(name string, owner, season, spreadsheet_position int)
 	return nil
 }
 
-func (m *TeamModel) Get(id int) (*models.Team, error) {
+func (m *TeamModel) GetFromId(id int) (*models.Team, error) {
 	t := &models.Team{}
 
 	stmt := `SELECT id, name, owner, season, spreadsheet_position FROM Teams WHERE id = $1`
 	err := m.DB.QueryRow(stmt, id).Scan(&t.ID, &t.Name, &t.Owner, &t.Season, &t.SpreadsheetPosition)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		} else {
+			return nil, err
+		}
+	}
+
+	return t, nil
+}
+
+func (m *TeamModel) Get(name string, owner int, season int) (*models.Team, error) {
+	t := &models.Team{}
+
+	stmt := `SELECT id, name, owner, season, spreadsheet_position FROM Teams WHERE name = $1 AND owner = $2 AND season = $3`
+	err := m.DB.QueryRow(stmt, name, owner, season).Scan(&t.ID, &t.Name, &t.Owner, &t.Season, &t.SpreadsheetPosition)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRecord
