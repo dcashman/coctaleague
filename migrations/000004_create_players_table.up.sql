@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS players (
     id bigserial PRIMARY KEY,
     name text NOT NULL,
     organization text,
-    player_type text,
+    player_type int,
     season bigserial NOT NULL,
     spreadsheet_position integer,
     espn_id integer,

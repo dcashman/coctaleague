@@ -38,3 +38,35 @@ type Team struct {
 	Season              int
 	SpreadsheetPosition int
 }
+
+type PlayerType int
+
+const (
+	QB PlayerType = iota
+	RB
+	WR
+	TE
+	K
+	D
+)
+
+// Type representing players in our table.
+type Player struct {
+	ID                  int
+	Name                string
+	Organization        string
+	Type                PlayerType
+	Season              int
+	SpreadsheetPosition int
+	espnId              int
+	espnPredictedPoints int
+	espnActualPoints    int
+}
+
+type Bid struct {
+	ID        int
+	Submitted time.Time
+	Player    int
+	Bidder    int
+	Amount    int
+}
