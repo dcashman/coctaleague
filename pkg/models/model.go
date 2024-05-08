@@ -25,7 +25,7 @@ type User struct {
 type Season struct {
 	ID      int
 	Name    string
-	Creator int
+	Creator User
 	Year    int
 	Funds   int
 }
@@ -34,8 +34,8 @@ type Season struct {
 type Team struct {
 	ID                  int
 	Name                string
-	Owner               int
-	Season              int
+	Owner               User
+	Season              Season
 	SpreadsheetPosition int
 }
 
@@ -56,7 +56,7 @@ type Player struct {
 	Name                string
 	Organization        string
 	Type                PlayerType
-	Season              int
+	Season              Season
 	SpreadsheetPosition int
 	espnId              int
 	espnPredictedPoints int
@@ -66,7 +66,16 @@ type Player struct {
 type Bid struct {
 	ID        int
 	Submitted time.Time
-	Player    int
-	Bidder    int
+	Player    Player
+	Bidder    Team
 	Amount    int
+}
+
+type Draft struct {
+	// Teams -> Player mapping
+
+	// Player weight and value
+
+	// maybe sort players in order of value, or just position, or cost
+
 }
