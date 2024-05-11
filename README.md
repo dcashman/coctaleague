@@ -65,13 +65,13 @@ Create a new env variable to store your session secret key.<br/>
 
 <h3> Running </h3>
 <ol>
-  <li> At root of repository, run "go run ./cmd/web" </li>
+  <li> At root of repository, run "go run ./cmd/web/main.go" </li>
   <li> Visit https://localhost:4000 on a browser on the dev machine. </li>
 </ol>
 
 <h3> Running CLI </h3>
 <ol>
-  <li> At root of repository, run "go run ./cmd/web" </li>
+  <li> At root of repository, run "go run ./cmd/cli/main.go" </li>
 </ol>
 <br/>
   If an Oauth error is encountered, the token.json present in the root directory from a previous invocation may be expired.

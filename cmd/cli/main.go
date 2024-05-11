@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,12 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
+)
+
+type BiddingStrategy int
+
+const (
+	MinimumBid BiddingStrategy = iota
 )
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -70,6 +77,22 @@ func saveToken(path string, token *oauth2.Token) {
 }
 
 func main() {
+
+	// Basic paremeters for the given season
+	var (
+		numMembers int
+		username   string
+		sheetRange string
+		sheetTitle string
+	)
+
+	flag.IntVar(&numMembers, "numMembers", 14, "Number of members in the league")
+	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
+	flag.StringVar(&sheetRange, "range", "A1:DX103", "Range of cells in the spreadsheet, e.g. A2:DX103")
+	flag.StringVar(&sheetTitle, "sheetTitle", "Copy of 2023 Draft!", "The sheet to target, e.g. 2023 Draft")
+
+	flag.Parse()
+
 	ctx := context.Background()
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {
@@ -89,10 +112,8 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
-	// Prints the names and majors of students in a sample spreadsheet:
-	// https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
 	spreadsheetId := "1hKj3yQduXosNy4Pn9XgzLlqPLArAxKowxip3zKD3UGE"
-	readRange := "2023 Draft!A2:DX103"
+	readRange := fmt.Sprintf("%s!%s", sheetTitle, sheetRange)
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
@@ -101,9 +122,9 @@ func main() {
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
 	} else {
-		fmt.Printf("first row: %s\n", resp.Values[4])
-		for i, row := range resp.Values {
-			fmt.Printf("%d, %s\n", i, row[0])
-		}
+		//fmt.Printf("first row: %s\n", resp.Values[4])
+		//for i, row := range resp.Values {
+		//fmt.Printf("%d, %s\n", i, row[0])
+		//}
 	}
 }
