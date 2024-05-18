@@ -8,17 +8,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
-)
 
-type BiddingStrategy int
-
-const (
-	MinimumBid BiddingStrategy = iota
+	"dcashman.net/coctaleague/pkg/bid"
+	"dcashman.net/coctaleague/pkg/models"
+	"dcashman.net/coctaleague/pkg/models/googlesheets"
 )
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -80,13 +79,17 @@ func main() {
 
 	// Basic paremeters for the given season
 	var (
+		maxRuntime int
 		numMembers int
+		pollFreq   int
 		username   string
 		sheetRange string
 		sheetTitle string
 	)
 
 	flag.IntVar(&numMembers, "numMembers", 14, "Number of members in the league")
+	flag.IntVar(&maxRuntime, "maxRuntime", 30, "How long to run this program before we stop polling the draft server and making bids.")
+	flag.IntVar(&pollFreq, "pollFreq", 30, "How often, in seconds, to poll the draft server and check to see if we need to make a bid")
 	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
 	flag.StringVar(&sheetRange, "range", "A1:DX103", "Range of cells in the spreadsheet, e.g. A2:DX103")
 	flag.StringVar(&sheetTitle, "sheetTitle", "Copy of 2023 Draft!", "The sheet to target, e.g. 2023 Draft")
@@ -112,19 +115,43 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
+	// TODO: Make this configurable dev vs. prod, right now only dev.
 	spreadsheetId := "1hKj3yQduXosNy4Pn9XgzLlqPLArAxKowxip3zKD3UGE"
 	readRange := fmt.Sprintf("%s!%s", sheetTitle, sheetRange)
-	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
-	}
 
-	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
-	} else {
-		//fmt.Printf("first row: %s\n", resp.Values[4])
-		//for i, row := range resp.Values {
-		//fmt.Printf("%d, %s\n", i, row[0])
-		//}
+	var draftDb models.DraftStore
+	draftDb = googlesheets.NewGoogleSheetsDb(readRange, spreadsheetId, srv, sheetTitle)
+
+	// We've gotten our sheet db, so let's start drafting!  We'll poll the draft until we reach a
+	// maximum timeout
+	start := time.Now()
+	maxDuration := time.Duration(maxRuntime) * time.Second
+	for {
+		if time.Since(start) > maxDuration {
+			// We're done here
+			log.Printf("Time's up, shutting down draft polling")
+			return
+		}
+
+		snapshot, err := draftDb.ParseDraft()
+		if err != nil {
+			log.Fatalf("Unable to parse draft from Google sheet: %v", err)
+		}
+
+		team := snapshot.TeamFromName(username)
+
+		// Check to see if any "basic" bids need to be cast before calculating. These bids are ones
+		// which we will always want to opportunistically make, such as making sure we have the best
+		// possible player already selected for any of the positions for which we only want to pay one
+		// point.
+		for _, bid := range bid.RecommendBids(snapshot, team, bid.Value) {
+			err := draftDb.PlaceBid(bid)
+			if err != nil {
+				log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
+			}
+		}
+
+		// Wait for 30 seconds before polling again
+		time.Sleep(time.Duration(pollFreq) * time.Second)
 	}
 }

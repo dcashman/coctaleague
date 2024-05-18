@@ -11,7 +11,7 @@ var (
 	ErrDuplicateEmail     = errors.New("models: duplicate email")
 )
 
-// Type representing users in our table.
+// Used for web application.
 type User struct {
 	ID             int
 	Name           string
@@ -21,22 +21,12 @@ type User struct {
 	Active         bool
 }
 
-// Type representing seasons in our table.
-type Season struct {
-	ID      int
-	Name    string
-	Creator User
-	Year    int
-	Funds   int
-}
-
 // Type representing teams in our table.
 type Team struct {
-	ID                  int
-	Name                string
-	Owner               User
-	Season              Season
-	SpreadsheetPosition int
+	ID     int
+	Name   string
+	Funds  int
+	Roster []*Player
 }
 
 type PlayerType int
@@ -52,30 +42,34 @@ const (
 
 // Type representing players in our table.
 type Player struct {
-	ID                  int
-	Name                string
-	Organization        string
-	Type                PlayerType
-	Season              Season
-	SpreadsheetPosition int
-	espnId              int
-	espnPredictedPoints int
-	espnActualPoints    int
+	ID             int
+	Name           string
+	Organization   string
+	Type           PlayerType
+	espnId         int
+	PredictedValue int
+	Bid            *Bid
 }
 
 type Bid struct {
 	ID        int
 	Submitted time.Time
-	Player    Player
-	Bidder    Team
+	Player    *Player
+	Bidder    *Team
 	Amount    int
 }
 
-type Draft struct {
-	// Teams -> Player mapping
+type DraftStore interface {
+	PlaceBid(bid Bid) error
 
-	// Player weight and value
+	ParseDraft() (DraftSnapshot, error)
+}
 
-	// maybe sort players in order of value, or just position, or cost
+type DraftSnapshot struct {
+	Teams   []*Team
+	Players map[PlayerType][]*Player
+}
 
+func (d DraftSnapshot) TeamFromName(name string) *Team {
+	return nil
 }

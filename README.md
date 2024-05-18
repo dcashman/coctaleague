@@ -65,7 +65,7 @@ Create a new env variable to store your session secret key.<br/>
 
 <h3> Running </h3>
 <ol>
-  <li> At root of repository, run "go run ./cmd/web/main.go" </li>
+  <li> At root of repository, run "go run ./cmd/web/" </li>
   <li> Visit https://localhost:4000 on a browser on the dev machine. </li>
 </ol>
 
