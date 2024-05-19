@@ -65,9 +65,19 @@ type DraftStore interface {
 	ParseDraft() (DraftSnapshot, error)
 }
 
+type LineupInfo interface {
+	PlayerSlots() int
+	PositionSlots() map[PlayerType]struct {
+		Min int
+		Max int
+	}
+}
+
 type DraftSnapshot struct {
-	Teams   []*Team
-	Players map[PlayerType][]*Player
+	StartingFunds int
+	Teams         []*Team
+	LineupInfo    LineupInfo
+	Players       map[PlayerType][]*Player
 }
 
 func (d DraftSnapshot) TeamFromName(name string) *Team {
