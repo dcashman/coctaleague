@@ -140,11 +140,9 @@ func main() {
 
 		team := snapshot.TeamFromName(username)
 
-		// Check to see if any "basic" bids need to be cast before calculating. These bids are ones
-		// which we will always want to opportunistically make, such as making sure we have the best
-		// possible player already selected for any of the positions for which we only want to pay one
-		// point.
-		for _, bid := range bid.RecommendBids(snapshot, team, bid.Value) {
+		// TODO: Get from cmdline params.
+		bidStrategy := bid.Strategy{bid.Value, bid.Predicted, bid.TwoPointMin}
+		for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
 			err := draftDb.PlaceBid(bid)
 			if err != nil {
 				log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
