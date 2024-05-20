@@ -1,0 +1,14 @@
+* Tasks:
+
+# To have a working draft for 2024 draft day
+  - Add test support, using DraftSnapshot
+  - Refactor strategy to be multi-dimensional with the following: { bid style:  { aggro, min, value }, value basis: {espn pts, historical diff, custom }, default-bids {1pt, 2pt} } - also add ability to customize how many 'starters' to incldue in alg vs. min bids
+  - Implement bid in spreadsheet DB
+  - Implement ParseDraft from spreadsheet
+  - Add knapsack-core
+    - Implement knapsack-core
+  - Create historical analysis module/package from spreadsheet
+
+
+# For future analysis
+  - Add postgres 
