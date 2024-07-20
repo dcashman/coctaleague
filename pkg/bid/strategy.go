@@ -1,6 +1,8 @@
 package bid
 
 import (
+	"math"
+
 	"dcashman.net/coctaleague/pkg/models"
 )
 
@@ -55,11 +57,8 @@ func CurrentBidder(snapshot models.DraftSnapshot) []*models.Team {
 		teams   []*models.Team
 	}{0, nil}
 	for _, t := range snapshot.Teams {
-		// Available funds for a team may contains some already spoken-for amounts, since there is a minimum
-		// number of players required for each team. For example, if a team has drafted 9 of 16 players, then
-		// bids must be made on the remaining 7 players, meaning 7 funds of the available (unspent) must be
-		// discounted.
-		available := t.Funds - (snapshot.LineupInfo.PlayerSlots() - len(t.Roster))
+
+		available := t.MaxBidValue(snapshot.LineupInfo)
 		if available > maxAvailable.currMax {
 			maxAvailable.currMax = available
 			maxAvailable.teams = []*models.Team{t}
@@ -71,5 +70,88 @@ func CurrentBidder(snapshot models.DraftSnapshot) []*models.Team {
 }
 
 func RecommendBids(snapshot models.DraftSnapshot, team *models.Team, strategy Strategy) []models.Bid {
-	return nil
+	// Get the preemptive bids out of the way first, since they don't affect our effective maximum bid
+	// amount, and if using non-1-pt preemptive bids, may change whether or not we are required to make
+	// a bid.
+	bids := preemptiveBids(snapshot, team, strategy)
+
+	// Calculate our next bid if required, for a 'real value' player.
+	// TODO: implement bid calculation logic.
+
+	return bids
+}
+
+// There is no 'right answer' in terms of the balance of starters vs. bench players and which positions.
+// We choose the an approximately balanecd option where each starter has, if possible, a sub.
+// TODO: add test for this function
+// TODO: consider new type for team comp
+func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) map[models.PlayerType]*struct {
+	Start int
+	Bench int
+} {
+	lineupInfo := snapshot.LineupInfo
+	numBenchPlayers := lineupInfo.PlayerSlots() - lineupInfo.StarterSlots()
+
+	// Determine how many starters we can choose positions for after the minimum has been allocated. While doing
+	// this, also record the gap sizes for each position, which represents which positions have the most potential
+	// in terms of adding players.
+	numFlexStarters := lineupInfo.StarterSlots()
+	gaps := make(map[models.PlayerType]int)
+	roster := make(map[models.PlayerType]*struct {
+		Start int
+		Bench int
+	})
+
+	// Go through each playerType
+	for _, pt := range models.AllPlayerTypes {
+		min := lineupInfo.PositionSlots()[pt].Min
+		roster[pt] = &struct {
+			Start int
+			Bench int
+		}{
+			Start: min,
+		}
+		gaps[pt] = lineupInfo.PositionSlots()[pt].Max - min
+		numFlexStarters -= min
+	}
+
+	// While we still have flexible starters, assign one to the position with the greatest avaliable number of starters.
+	// The intuition here is that we will try to have more reserves for these positions to give us greater flexibility.
+	for numFlexStarters > 0 {
+		// Get the position with the highest remaining values
+		maxGap := 0
+		var maxPT models.PlayerType
+		for k, v := range gaps {
+			if v > maxGap {
+				maxGap = v
+				maxPT = k
+			}
+		}
+		roster[maxPT].Start += 1
+		numFlexStarters -= 1
+	}
+
+	// Now do the same with the bench: assign bench players according to which positions have the most starters currently
+	// without backups.
+	for numBenchPlayers > 0 {
+		maxGap := math.MinInt // We could find ourselves in a situation in which every position has more bench players than starters
+		var maxPT models.PlayerType
+		for k, v := range roster {
+
+			// We never want backups for Defense or Kickers
+			if k == models.D || k == models.K {
+				continue
+			}
+
+			gap := v.Start - v.Bench
+			if gap > maxGap {
+				maxPT = k
+				maxGap = gap
+			}
+		}
+		roster[maxPT].Bench += 1
+		numBenchPlayers -= 1
+	}
+
+	return roster
 }

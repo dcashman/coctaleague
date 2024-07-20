@@ -138,10 +138,13 @@ func main() {
 			log.Fatalf("Unable to parse draft from Google sheet: %v", err)
 		}
 
-		team := snapshot.TeamFromName(username)
+		team, err := models.TeamFromName(snapshot, username)
+		if err != nil {
+			log.Fatalf("No such team with username: %v", err)
+		}
 
 		// TODO: Get from cmdline params.
-		bidStrategy := bid.Strategy{bid.Value, bid.Predicted, bid.TwoPointMin}
+		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
 		for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
 			err := draftDb.PlaceBid(bid)
 			if err != nil {
