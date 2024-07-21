@@ -62,23 +62,23 @@ func NewEmptyDraftSnapshot(startingFunds int, lineupInfo models.LineupInfo) mode
 	return testDraftSnapshot{
 		startingFunds: startingFunds,
 		lineupInfo:    lineupInfo,
-		teams:         []*models.Team{},
-		players:       make(map[models.PlayerType][]*models.Player),
+		teams:         []models.Team{},
+		players:       make(map[models.PlayerType][]models.Player),
 	}
 }
 
 type testDraftSnapshot struct {
 	startingFunds int
-	teams         []*models.Team
+	teams         []models.Team
 	lineupInfo    models.LineupInfo
-	players       map[models.PlayerType][]*models.Player
+	players       map[models.PlayerType][]models.Player
 }
 
 func (t testDraftSnapshot) StartingFunds() int {
 	return t.startingFunds
 }
 
-func (t testDraftSnapshot) Teams() []*models.Team {
+func (t testDraftSnapshot) Teams() []models.Team {
 	return t.teams
 }
 
@@ -86,6 +86,6 @@ func (t testDraftSnapshot) LineupInfo() models.LineupInfo {
 	return t.lineupInfo
 }
 
-func (t testDraftSnapshot) Players() map[models.PlayerType][]*models.Player {
+func (t testDraftSnapshot) Players() map[models.PlayerType][]models.Player {
 	return t.players
 }

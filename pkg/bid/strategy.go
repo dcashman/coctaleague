@@ -58,17 +58,17 @@ type PositionDistribution struct {
 type TeamComposition map[models.PlayerType]PositionDistribution
 
 // Current bidder returns multiple teams in the event that multiple teams have the same remaining funds.
-func CurrentBidder(snapshot models.DraftSnapshot) []*models.Team {
+func CurrentBidder(snapshot models.DraftSnapshot) []models.Team {
 	maxAvailable := struct {
 		currMax int
-		teams   []*models.Team
+		teams   []models.Team
 	}{0, nil}
 	for _, t := range snapshot.Teams() {
 
-		available := t.MaxBidValue(snapshot.LineupInfo())
+		available := models.MaxBidValue(t, snapshot.LineupInfo())
 		if available > maxAvailable.currMax {
 			maxAvailable.currMax = available
-			maxAvailable.teams = []*models.Team{t}
+			maxAvailable.teams = []models.Team{t}
 		} else if available == maxAvailable.currMax {
 			maxAvailable.teams = append(maxAvailable.teams, t)
 		}
@@ -76,7 +76,7 @@ func CurrentBidder(snapshot models.DraftSnapshot) []*models.Team {
 	return maxAvailable.teams
 }
 
-func RecommendBids(snapshot models.DraftSnapshot, team *models.Team, strategy Strategy) []models.Bid {
+func RecommendBids(snapshot models.DraftSnapshot, team models.Team, strategy Strategy) []models.Bid {
 	// Get the preemptive bids out of the way first, since they don't affect our effective maximum bid
 	// amount, and if using non-1-pt preemptive bids, may change whether or not we are required to make
 	// a bid.

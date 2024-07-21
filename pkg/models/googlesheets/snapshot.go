@@ -3,6 +3,10 @@ package googlesheets
 import "dcashman.net/coctaleague/pkg/models"
 
 type GoogleSheetsSnapshot struct {
+	startingFunds int
+	lineupInfo    LineupInfo
+	teams         []*Team
+	players       map[models.PlayerType][]*Player
 }
 
 func (*GoogleSheetsSnapshot) StartingFunds() int {

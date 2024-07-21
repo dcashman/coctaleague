@@ -10,7 +10,7 @@ import (
 // which we will always want to opportunistically make, such as making sure we have the best
 // possible player already selected for any of the positions for which we only want to pay one
 // point.
-func preemptiveBids(snapshot models.DraftSnapshot, team *models.Team, strategy Strategy) []models.Bid {
+func preemptiveBids(snapshot models.DraftSnapshot, team models.Team, strategy Strategy) []models.Bid {
 	bids := []models.Bid{}
 
 	// Iterate through each position type
@@ -21,7 +21,7 @@ func preemptiveBids(snapshot models.DraftSnapshot, team *models.Team, strategy S
 	return bids
 }
 
-func minBids(snapshot models.DraftSnapshot, team *models.Team, position models.PlayerType, strategy Strategy) []models.Bid {
+func minBids(snapshot models.DraftSnapshot, team models.Team, position models.PlayerType, strategy Strategy) []models.Bid {
 	bids := []models.Bid{}
 
 	//  Determine price to bid
@@ -36,13 +36,13 @@ func minBids(snapshot models.DraftSnapshot, team *models.Team, position models.P
 	allPlayers := snapshot.Players()
 	players := allPlayers[position]
 	sort.Slice(players, func(i, j int) bool {
-		return players[i].PredictedValue < players[j].PredictedValue
+		return players[i].PredictedValue() < players[j].PredictedValue()
 	})
 
 	i := 0
 	for numBids > 0 && i < len(players) {
-		if players[i].Bid.Amount < minValue && players[i].Bid.Bidder != team {
-			bids = append(bids, models.Bid{Bidder: team, Player: players[i], Amount: players[i].Bid.Amount + 1})
+		if players[i].Bid().Amount < minValue && players[i].Bid().Bidder != team {
+			bids = append(bids, models.Bid{Bidder: team, Player: players[i], Amount: players[i].Bid().Amount + 1})
 			numBids--
 		}
 		i++
@@ -52,10 +52,10 @@ func minBids(snapshot models.DraftSnapshot, team *models.Team, position models.P
 }
 
 // Determine how many of the given position need to receive bids.
-func minBidQuantity(snapshot models.DraftSnapshot, team *models.Team, position models.PlayerType, strategy Strategy) int {
+func minBidQuantity(snapshot models.DraftSnapshot, team models.Team, position models.PlayerType, strategy Strategy) int {
 	var currentMinBids int
-	for k := range team.Roster[position] {
-		if k.Bid.Amount <= minBidAmount(strategy) {
+	for k := range team.Roster()[position] {
+		if k.Bid().Amount <= minBidAmount(strategy) {
 			// This player could represent one of our default bids
 			currentMinBids++
 		}

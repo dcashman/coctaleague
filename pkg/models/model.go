@@ -11,7 +11,7 @@ var (
 	ErrDuplicateEmail     = errors.New("models: duplicate email")
 )
 
-// Used for web application.
+// Used for web application, which doesn't really work yet.
 type User struct {
 	ID             int
 	Name           string
@@ -43,18 +43,27 @@ func init() {
 }
 
 // Type representing players in our table.
-type Player struct {
-	Name           string
-	Organization   string
-	Type           PlayerType
-	PredictedValue int
-	Bid            *Bid
+type Player interface {
+	Name() string         // Player's name
+	Organization() string // Team player is a part of in the 'real world'
+	Type() PlayerType
+	PredictedValue() int // Value we expect this player to produce. potentially used for bids.
+	Bid() Bid            // Current 'winning bid' for the player.
+	UpdateBid(b Bid) error
 }
 
 type Bid struct {
-	Player *Player
-	Bidder *Team
+	Player Player
+	Bidder Team
 	Amount int
+}
+
+func NewBid(p Player, t Team, a int) Bid {
+	return Bid{
+		Player: p,
+		Bidder: t,
+		Amount: a,
+	}
 }
 
 type DraftStore interface {
@@ -74,15 +83,15 @@ type LineupInfo interface {
 
 type DraftSnapshot interface {
 	StartingFunds() int
-	Teams() []*Team
+	Teams() []Team
 	LineupInfo() LineupInfo
-	Players() map[PlayerType][]*Player
+	Players() map[PlayerType][]Player
 }
 
 // Convenience function that relies on the currently-true assumption that each team has a unique Name.
-func TeamFromName(d DraftSnapshot, name string) (*Team, error) {
+func TeamFromName(d DraftSnapshot, name string) (Team, error) {
 	for _, t := range d.Teams() {
-		if t.Name == name {
+		if t.Name() == name {
 			return t, nil
 		}
 	}

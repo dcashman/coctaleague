@@ -9,7 +9,7 @@ import (
 
 type minBidQuantityInput struct {
 	ds models.DraftSnapshot
-	t  *models.Team
+	t  models.Team
 	pt models.PlayerType
 	s  Strategy
 }
@@ -17,7 +17,7 @@ type minBidQuantityInput struct {
 func defaultMinBidQualityInput(pt models.PlayerType) minBidQuantityInput {
 	return minBidQuantityInput{
 		ds: testutil.NewEmptyDraftSnapshot(100, testutil.TestLineupInfo),
-		t:  &testutil.TestTeam01,
+		t:  testutil.TestTeam01,
 		pt: pt,
 		s:  TestStrategy,
 	}

@@ -104,6 +104,7 @@ func main() {
 
 	// If modifying these scopes, delete your previously saved token.json.
 	// See scopes at https://developers.google.com/identity/protocols/oauth2/scopes
+	// Remove readonly for write access.
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
