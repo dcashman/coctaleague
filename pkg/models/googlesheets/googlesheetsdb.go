@@ -34,7 +34,7 @@ func NewGoogleSheetsDb(bounds string, id string, service *sheets.Service, title 
 
 func (g *GoogleSheetsDb) ParseDraft() (models.DraftSnapshot, error) {
 	// Use the underlying sheet to populate a SheetDraft type, which implements the DraftSnapshot interface.
-	return models.DraftSnapshot{}, nil
+	return nil, nil
 }
 
 func (g *GoogleSheetsDb) PlaceBid(models.Bid) error {
