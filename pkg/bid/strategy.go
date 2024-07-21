@@ -50,15 +50,22 @@ type Strategy struct {
 	Preemptive Preemptive
 }
 
+type PositionDistribution struct {
+	Start int
+	Bench int
+}
+
+type TeamComposition map[models.PlayerType]PositionDistribution
+
 // Current bidder returns multiple teams in the event that multiple teams have the same remaining funds.
 func CurrentBidder(snapshot models.DraftSnapshot) []*models.Team {
 	maxAvailable := struct {
 		currMax int
 		teams   []*models.Team
 	}{0, nil}
-	for _, t := range snapshot.Teams {
+	for _, t := range snapshot.Teams() {
 
-		available := t.MaxBidValue(snapshot.LineupInfo)
+		available := t.MaxBidValue(snapshot.LineupInfo())
 		if available > maxAvailable.currMax {
 			maxAvailable.currMax = available
 			maxAvailable.teams = []*models.Team{t}
@@ -85,11 +92,8 @@ func RecommendBids(snapshot models.DraftSnapshot, team *models.Team, strategy St
 // We choose the an approximately balanecd option where each starter has, if possible, a sub.
 // TODO: add test for this function
 // TODO: consider new type for team comp
-func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) map[models.PlayerType]*struct {
-	Start int
-	Bench int
-} {
-	lineupInfo := snapshot.LineupInfo
+func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) TeamComposition {
+	lineupInfo := snapshot.LineupInfo()
 	numBenchPlayers := lineupInfo.PlayerSlots() - lineupInfo.StarterSlots()
 
 	// Determine how many starters we can choose positions for after the minimum has been allocated. While doing
@@ -97,18 +101,13 @@ func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) ma
 	// in terms of adding players.
 	numFlexStarters := lineupInfo.StarterSlots()
 	gaps := make(map[models.PlayerType]int)
-	roster := make(map[models.PlayerType]*struct {
-		Start int
-		Bench int
-	})
+	roster := make(TeamComposition)
 
 	// Go through each playerType
 	for _, pt := range models.AllPlayerTypes {
 		min := lineupInfo.PositionSlots()[pt].Min
-		roster[pt] = &struct {
-			Start int
-			Bench int
-		}{
+
+		roster[pt] = PositionDistribution{
 			Start: min,
 		}
 		gaps[pt] = lineupInfo.PositionSlots()[pt].Max - min
@@ -127,12 +126,21 @@ func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) ma
 				maxPT = k
 			}
 		}
-		roster[maxPT].Start += 1
+		// Add a starter
+		pd := roster[maxPT]
+		pd.Start += 1
+		roster[maxPT] = pd
+
+		// Take away a gap count
+		gaps[maxPT] = gaps[maxPT] - 1
+
 		numFlexStarters -= 1
 	}
 
 	// Now do the same with the bench: assign bench players according to which positions have the most starters currently
 	// without backups.
+	// TODO: enable us to give priority to certain positions in the event of tie.  For example: after the first round, RBs and WRs may both have a gap
+	// of 1 player, so which should get the next starter?
 	for numBenchPlayers > 0 {
 		maxGap := math.MinInt // We could find ourselves in a situation in which every position has more bench players than starters
 		var maxPT models.PlayerType
@@ -149,7 +157,9 @@ func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) ma
 				maxGap = gap
 			}
 		}
-		roster[maxPT].Bench += 1
+		pd := roster[maxPT]
+		pd.Bench += 1
+		roster[maxPT] = pd
 		numBenchPlayers -= 1
 	}
 
