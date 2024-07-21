@@ -4,6 +4,10 @@ import (
 	"dcashman.net/coctaleague/pkg/models"
 )
 
+const (
+	DEFAULT_STARTING_FUNDS = 100
+)
+
 var (
 	TestPositionSlots = map[models.PlayerType]struct {
 		Min int
@@ -20,6 +24,13 @@ var (
 		playerSlots:   16,
 		starterSlots:  9,
 		positionSlots: TestPositionSlots,
+	}
+
+	TestDraftSnapshot = testDraftSnapshot{
+		startingFunds: DEFAULT_STARTING_FUNDS,
+		teams:         TestTeams,
+		lineupInfo:    TestLineupInfo,
+		players:       TestPlayerMap,
 	}
 )
 
