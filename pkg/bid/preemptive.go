@@ -63,7 +63,14 @@ func minBidQuantity(snapshot models.DraftSnapshot, team *models.Team, position m
 
 	// We may have some open 'min bid slots', but we may also have all of them filled, and potentailly some non-min
 	// entries going for cheap enough to qualify as min-bid.
-	playersNeeded := DesiredTeamComposition(snapshot, strategy)[position].Bench - currentMinBids
+	positionComp := DesiredTeamComposition(snapshot, strategy)[position]
+	minBidsForPosition := positionComp.Bench
+
+	// Defense and kickers are both considered minbids even for their starters, so add those in too
+	if position == models.D || position == models.K {
+		minBidsForPosition += positionComp.Start
+	}
+	playersNeeded := minBidsForPosition - currentMinBids
 	if playersNeeded > 0 {
 		return playersNeeded
 	}

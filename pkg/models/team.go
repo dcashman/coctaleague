@@ -2,12 +2,10 @@ package models
 
 import (
 	"fmt"
-	"time"
 )
 
 // Type representing teams in our table.
 type Team struct {
-	ID     int
 	Name   string
 	Funds  int
 	Roster map[PlayerType]map[*Player]bool
@@ -37,11 +35,9 @@ func (t *Team) AddPlayer(p *Player, li LineupInfo, bid int) error {
 
 	// Finally, add the player to our team, first by updating the 'winning bid on the player', then by adding it to the roster.
 	p.Bid = &Bid{
-		ID:        0,
-		Submitted: time.Now(),
-		Player:    p,
-		Bidder:    t,
-		Amount:    bid,
+		Player: p,
+		Bidder: t,
+		Amount: bid,
 	}
 	t.Funds -= p.Bid.Amount
 	t.Roster[p.Type][p] = true

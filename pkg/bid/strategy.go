@@ -109,6 +109,7 @@ func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) Te
 
 		roster[pt] = PositionDistribution{
 			Start: min,
+			Bench: 0,
 		}
 		gaps[pt] = lineupInfo.PositionSlots()[pt].Max - min
 		numFlexStarters -= min
@@ -120,10 +121,13 @@ func DesiredTeamComposition(snapshot models.DraftSnapshot, strategy Strategy) Te
 		// Get the position with the highest remaining values
 		maxGap := 0
 		var maxPT models.PlayerType
-		for k, v := range gaps {
-			if v > maxGap {
-				maxGap = v
-				maxPT = k
+
+		// Iterate through all positions using deterministic order. Eventually we should write a clear preference, but for
+		// now just rely on our declared preferences, which happen to align with the order of positions.
+		for _, pt := range models.AllPlayerTypes {
+			if gaps[pt] > maxGap {
+				maxGap = gaps[pt]
+				maxPT = pt
 			}
 		}
 		// Add a starter

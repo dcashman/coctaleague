@@ -44,21 +44,17 @@ func init() {
 
 // Type representing players in our table.
 type Player struct {
-	ID             int
 	Name           string
 	Organization   string
 	Type           PlayerType
-	espnId         int
 	PredictedValue int
 	Bid            *Bid
 }
 
 type Bid struct {
-	ID        int
-	Submitted time.Time
-	Player    *Player
-	Bidder    *Team
-	Amount    int
+	Player *Player
+	Bidder *Team
+	Amount int
 }
 
 type DraftStore interface {
