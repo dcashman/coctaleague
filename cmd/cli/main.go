@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -15,7 +16,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 
-	"dcashman.net/coctaleague/pkg/bid"
 	"dcashman.net/coctaleague/pkg/models"
 	"dcashman.net/coctaleague/pkg/models/googlesheets"
 )
@@ -75,6 +75,21 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
+type ShotclockData struct {
+	//lastUpdate time.Time
+	duration    time.Duration
+	hotseatTeam string
+	history     map[string]time.Duration
+}
+
+func initializeShotClockData(f string) *ShotclockData {
+	return &ShotclockData{
+		duration:    0,
+		hotseatTeam: "",
+		history:     make(map[string]time.Duration),
+	}
+}
+
 func main() {
 
 	// Basic paremeters for the given season
@@ -82,9 +97,11 @@ func main() {
 		maxRuntime int
 		numMembers int
 		pollFreq   int
+		prod       bool
 		username   string
 		sheetRange string
 		sheetTitle string
+		scFile     string
 	)
 
 	flag.IntVar(&numMembers, "numMembers", 14, "Number of members in the league")
@@ -92,7 +109,9 @@ func main() {
 	flag.IntVar(&pollFreq, "pollFreq", 30, "How often, in seconds, to poll the draft server and check to see if we need to make a bid")
 	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
 	flag.StringVar(&sheetRange, "range", "A1:DX103", "Range of cells in the spreadsheet, e.g. A2:DX103")
-	flag.StringVar(&sheetTitle, "sheetTitle", "Copy of 2023 Draft!", "The sheet to target, e.g. 2023 Draft")
+	flag.StringVar(&sheetTitle, "sheetTitle", "2024 Draft", "The sheet to target, e.g. 2023 Draft")
+	flag.BoolVar(&prod, "prod", false, "Whether or not to use the real sheet")
+	flag.StringVar(&scFile, "scFile", "", "File to record shot-clock time information")
 
 	flag.Parse()
 
@@ -105,7 +124,8 @@ func main() {
 	// If modifying these scopes, delete your previously saved token.json.
 	// See scopes at https://developers.google.com/identity/protocols/oauth2/scopes
 	// Remove readonly for write access.
-	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
+	//config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
+	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
@@ -118,10 +138,24 @@ func main() {
 
 	// TODO: Make this configurable dev vs. prod, right now only dev.
 	spreadsheetId := "1hKj3yQduXosNy4Pn9XgzLlqPLArAxKowxip3zKD3UGE"
-	readRange := fmt.Sprintf("%s!%s", sheetTitle, sheetRange)
+	if prod {
+		spreadsheetId = "1bzgEDvbHuntqp6FdJiMMg5rmjQ2b5N6pi0BjDy5R8vE"
+	}
 
 	var draftDb models.DraftStore
-	draftDb = googlesheets.NewGoogleSheetsDb(readRange, spreadsheetId, srv, sheetTitle)
+	draftDb = googlesheets.NewGoogleSheetsDb(sheetRange, spreadsheetId, srv, sheetTitle)
+
+	// Deal with our timekeeping job
+	// 1. open the file if one exists to grab the existing values: we need to know the last person who was 'it' to
+	// detect if there has been any change.
+	// Then we want to write out the value to a file.
+	var scData *ShotclockData
+	if scFile != "" {
+		scData = initializeShotClockData(scFile)
+		if err != nil {
+			log.Fatalf("Unable to initialize shot clock data: %v", err)
+		}
+	}
 
 	// We've gotten our sheet db, so let's start drafting!  We'll poll the draft until we reach a
 	// maximum timeout
@@ -138,19 +172,37 @@ func main() {
 		if err != nil {
 			log.Fatalf("Unable to parse draft from Google sheet: %v", err)
 		}
-
-		team, err := models.TeamFromName(snapshot, username)
-		if err != nil {
-			log.Fatalf("No such team with username: %v", err)
-		}
-
-		// TODO: Get from cmdline params.
-		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
-		for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
-			err := draftDb.PlaceBid(bid)
+		/*
+			team, err := models.TeamFromName(snapshot, username)
 			if err != nil {
-				log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
+				log.Fatalf("No such team with username: %v", err)
 			}
+
+			// TODO: Get from cmdline params.
+			bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
+			for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
+				err := draftDb.PlaceBid(bid)
+				if err != nil {
+					log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
+				}
+			}
+		*/
+		if scData != nil {
+			hs := snapshot.Hotseat()
+			if strings.Contains(hs, "& other") {
+				hs = "multiple"
+			}
+			history := snapshot.Times()
+			if hs != scData.hotseatTeam {
+				scData.hotseatTeam = hs
+				scData.duration = 0
+			} else {
+				scData.duration += time.Second * time.Duration(pollFreq)
+				d := history[hs]
+				history[hs] = d + time.Second*time.Duration(pollFreq)
+			}
+			draftDb.WriteShotclock(scData.duration, history[hs], history)
+			fmt.Printf("Total times so far:\n%v\n\n", history)
 		}
 
 		// Wait for 30 seconds before polling again

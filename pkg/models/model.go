@@ -70,6 +70,7 @@ type DraftStore interface {
 	PlaceBid(bid Bid) error
 
 	ParseDraft() (DraftSnapshot, error)
+	WriteShotclock(d time.Duration, td time.Duration, h map[string]time.Duration) error
 }
 
 type LineupInfo interface {
@@ -86,6 +87,8 @@ type DraftSnapshot interface {
 	Teams() []Team
 	LineupInfo() LineupInfo
 	Players() map[PlayerType][]Player
+	Hotseat() string
+	Times() map[string]time.Duration
 }
 
 // Convenience function that relies on the currently-true assumption that each team has a unique Name.

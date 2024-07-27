@@ -1,26 +1,40 @@
 package googlesheets
 
-import "dcashman.net/coctaleague/pkg/models"
+import (
+	"time"
+
+	"dcashman.net/coctaleague/pkg/models"
+)
 
 type GoogleSheetsSnapshot struct {
 	startingFunds int
 	lineupInfo    LineupInfo
-	teams         []*Team
-	players       map[models.PlayerType][]*Player
+	teams         []Team
+	players       map[models.PlayerType][]Player
+	hotseat       string
+	times         map[string]time.Duration
 }
 
-func (*GoogleSheetsSnapshot) StartingFunds() int {
+func (g *GoogleSheetsSnapshot) StartingFunds() int {
 	return 0
 }
 
-func (*GoogleSheetsSnapshot) Teams() []*models.Team {
+func (g *GoogleSheetsSnapshot) Teams() []models.Team {
 	return nil
 }
 
-func (*GoogleSheetsSnapshot) LineupInfo() models.LineupInfo {
+func (g *GoogleSheetsSnapshot) LineupInfo() models.LineupInfo {
 	return nil
 }
 
-func (*GoogleSheetsSnapshot) Players() map[models.PlayerType][]*models.Player {
+func (g *GoogleSheetsSnapshot) Players() map[models.PlayerType][]models.Player {
 	return nil
+}
+
+func (g *GoogleSheetsSnapshot) Hotseat() string {
+	return g.hotseat
+}
+
+func (g *GoogleSheetsSnapshot) Times() map[string]time.Duration {
+	return g.times
 }

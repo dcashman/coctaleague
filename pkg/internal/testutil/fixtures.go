@@ -1,6 +1,8 @@
 package testutil
 
 import (
+	"time"
+
 	"dcashman.net/coctaleague/pkg/models"
 )
 
@@ -64,6 +66,8 @@ func NewEmptyDraftSnapshot(startingFunds int, lineupInfo models.LineupInfo) mode
 		lineupInfo:    lineupInfo,
 		teams:         []models.Team{},
 		players:       make(map[models.PlayerType][]models.Player),
+		hotseat:       "Andrea",
+		times:         make(map[string]time.Duration),
 	}
 }
 
@@ -72,6 +76,8 @@ type testDraftSnapshot struct {
 	teams         []models.Team
 	lineupInfo    models.LineupInfo
 	players       map[models.PlayerType][]models.Player
+	hotseat       string
+	times         map[string]time.Duration
 }
 
 func (t testDraftSnapshot) StartingFunds() int {
@@ -88,4 +94,12 @@ func (t testDraftSnapshot) LineupInfo() models.LineupInfo {
 
 func (t testDraftSnapshot) Players() map[models.PlayerType][]models.Player {
 	return t.players
+}
+
+func (t testDraftSnapshot) Hotseat() string {
+	return t.hotseat
+}
+
+func (t testDraftSnapshot) Times() map[string]time.Duration {
+	return t.times
 }
