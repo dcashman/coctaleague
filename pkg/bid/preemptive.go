@@ -36,7 +36,8 @@ func minBids(snapshot models.DraftSnapshot, team models.Team, position models.Pl
 	allPlayers := snapshot.Players()
 	players := allPlayers[position]
 	sort.Slice(players, func(i, j int) bool {
-		return players[i].PredictedValue() < players[j].PredictedValue()
+		// We want to sort by greatest value first, not lowest
+		return players[i].PredictedValue() > players[j].PredictedValue()
 	})
 
 	i := 0
