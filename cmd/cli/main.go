@@ -190,7 +190,7 @@ func main() {
 		if scData != nil {
 			hs := snapshot.Hotseat()
 			if strings.Contains(hs, "& other") {
-				hs = "multiple"
+				hs = "Multiple"
 			}
 			history := snapshot.Times()
 			if hs != scData.hotseatTeam {
