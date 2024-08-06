@@ -108,7 +108,7 @@ func main() {
 	flag.IntVar(&maxRuntime, "maxRuntime", 30, "How long to run this program before we stop polling the draft server and making bids.")
 	flag.IntVar(&pollFreq, "pollFreq", 30, "How often, in seconds, to poll the draft server and check to see if we need to make a bid")
 	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
-	flag.StringVar(&sheetRange, "range", "A1:DX103", "Range of cells in the spreadsheet, e.g. A2:DX103")
+	flag.StringVar(&sheetRange, "range", "DX103", "Second value for range of cells in the spreadsheet, e.g. A1:DX103 should provide DX103. Program starts at A1 by default")
 	flag.StringVar(&sheetTitle, "sheetTitle", "2024 Draft", "The sheet to target, e.g. 2023 Draft")
 	flag.BoolVar(&prod, "prod", false, "Whether or not to use the real sheet")
 	flag.StringVar(&scFile, "scFile", "", "File to record shot-clock time information")
@@ -137,11 +137,12 @@ func main() {
 	}
 
 	// TODO: Make this configurable dev vs. prod, right now only dev.
-	spreadsheetId := "1hKj3yQduXosNy4Pn9XgzLlqPLArAxKowxip3zKD3UGE"
+	spreadsheetId := "1sOHHqvsp4QWZOErmRz0k6MJDxU6fPP_SpUEhWF6BQg8"
 	if prod {
 		spreadsheetId = "1bzgEDvbHuntqp6FdJiMMg5rmjQ2b5N6pi0BjDy5R8vE"
 	}
 
+	sheetRange = fmt.Sprintf("%s:%s", "A1", sheetRange)
 	var draftDb models.DraftStore
 	draftDb = googlesheets.NewGoogleSheetsDb(sheetRange, spreadsheetId, srv, sheetTitle)
 
@@ -168,16 +169,19 @@ func main() {
 			return
 		}
 
-		snapshot, err := draftDb.ParseDraft()
+		snapshot, err := draftDb.ParseDraft(numMembers)
 		if err != nil {
 			log.Fatalf("Unable to parse draft from Google sheet: %v", err)
 		}
-		/*
-			team, err := models.TeamFromName(snapshot, username)
-			if err != nil {
-				log.Fatalf("No such team with username: %v", err)
-			}
 
+		team, err := models.TeamFromName(snapshot, username)
+		if err != nil {
+			log.Fatalf("No such team with username: %v", err)
+		}
+
+		log.Printf("Team name: %s\n", team.Name())
+
+		/*
 			// TODO: Get from cmdline params.
 			bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
 			for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {

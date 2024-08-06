@@ -1,6 +1,7 @@
 package googlesheets
 
 import (
+	"log"
 	"time"
 
 	"dcashman.net/coctaleague/pkg/models"
@@ -16,11 +17,17 @@ type GoogleSheetsSnapshot struct {
 }
 
 func (g *GoogleSheetsSnapshot) StartingFunds() int {
-	return 0
+	return g.startingFunds
 }
 
 func (g *GoogleSheetsSnapshot) Teams() []models.Team {
-	return nil
+	s := make([]models.Team, len(g.teams))
+	for i, _ := range g.teams {
+		s[i] = &g.teams[i]
+	}
+	log.Printf("Name of team in inter: %s vs. raw: %s\n", s[0].Name(), g.teams[0].name)
+
+	return s
 }
 
 func (g *GoogleSheetsSnapshot) LineupInfo() models.LineupInfo {
