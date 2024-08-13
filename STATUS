@@ -1,9 +1,7 @@
 * Tasks:
 
-# To have a working draft for 2024 draft day MVP
-  - Add test support, using DraftSnapshot
+# To have a working draft for 2025 draft day MVP
   - Implement bid in spreadsheet DB
-  - Implement ParseDraft from spreadsheet
   - Add knapsack-core
     - Implement knapsack-core  
 
