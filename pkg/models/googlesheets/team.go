@@ -16,9 +16,10 @@ type Team struct {
 
 func NewTeam(name string, funds int, cell string) Team {
 	return Team{
-		name:  name,
-		funds: funds,
-		cell:  cell}
+		name:   name,
+		funds:  funds,
+		roster: make(map[models.PlayerType]map[models.Player]bool),
+		cell:   cell}
 }
 
 func (t *Team) Name() string {
@@ -83,15 +84,20 @@ func parseTeams(vr *sheets.ValueRange, numTeams int, startingFunds int) ([]Team,
 	// In the current version, we start the team list at row 4 in the first (A) column, with funds in col C
 	// Note: these funds are calculated by spreadsheet, we may want to check them against the total bids at the end of
 	// parsing.  For now we ignore them and do the calculations here.
-	teamStart := 3
+	row, col, err := cellStrToIndices(TEAMS_CELL)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get starting indices for team list at starting cell %s in spreasheet. %s\n", TEAMS_CELL, err.Error())
+	}
+	teamStart := row
 	for i := teamStart; i < teamStart+numTeams; i++ {
-		cell := indicesToCellStr(i, 0)
-		name := interfaceToString(v[i][0])
-		spent, err := interfaceToInt(v[i][2])
+		cell := indicesToCellStr(i, col)
+		name := interfaceToString(v[i][col])
+		spend_index := col + TEAMS_SPENT_OFFSET
+		spent, err := interfaceToInt(v[i][col+spend_index])
 		//		log.Printf("Teams name for cell: %s, is %s, with %d spent\n", cell, name, spent)
 
 		if err != nil {
-			return nil, fmt.Errorf("Funds read for team %s, in cell: %s not an integer. %s\n", name, indicesToCellStr(i, 2), err.Error())
+			return nil, fmt.Errorf("Funds read for team %s, in cell: %s not an integer. %s\n", name, indicesToCellStr(i, spend_index), err.Error())
 		}
 		teams = append(teams, NewTeam(name, startingFunds-spent, cell))
 	}

@@ -16,6 +16,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 
+	"dcashman.net/coctaleague/pkg/bid"
 	"dcashman.net/coctaleague/pkg/models"
 	"dcashman.net/coctaleague/pkg/models/googlesheets"
 )
@@ -108,7 +109,7 @@ func main() {
 	flag.IntVar(&maxRuntime, "maxRuntime", 30, "How long to run this program before we stop polling the draft server and making bids.")
 	flag.IntVar(&pollFreq, "pollFreq", 30, "How often, in seconds, to poll the draft server and check to see if we need to make a bid")
 	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
-	flag.StringVar(&sheetRange, "range", "DX103", "Second value for range of cells in the spreadsheet, e.g. A1:DX103 should provide DX103. Program starts at A1 by default")
+	flag.StringVar(&sheetRange, "range", "DX111", "Second value for range of cells in the spreadsheet, e.g. A1:DX103 should provide DX103. Program starts at A1 by default")
 	flag.StringVar(&sheetTitle, "sheetTitle", "2024 Draft", "The sheet to target, e.g. 2023 Draft")
 	flag.BoolVar(&prod, "prod", false, "Whether or not to use the real sheet")
 	flag.StringVar(&scFile, "scFile", "", "File to record shot-clock time information")
@@ -179,18 +180,15 @@ func main() {
 			log.Fatalf("No such team with username: %v", err)
 		}
 
-		log.Printf("Team name: %s\n", team.Name())
-
-		/*
-			// TODO: Get from cmdline params.
-			bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
-			for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
-				err := draftDb.PlaceBid(bid)
-				if err != nil {
-					log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
-				}
+		// TODO: Get from cmdline params.
+		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
+		for _, bid := range bid.RecommendBids(snapshot, team, bidStrategy) {
+			err := draftDb.PlaceBid(bid)
+			if err != nil {
+				log.Fatalf("Unable to place Bid: %v. Error: %v", bid, err)
 			}
-		*/
+		}
+
 		if scData != nil {
 			hs := snapshot.Hotseat()
 			if strings.Contains(hs, "& other") {

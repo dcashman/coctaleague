@@ -14,7 +14,15 @@ import (
 )
 
 const (
-	STARTING_FUNDS_CELL = "C2"
+	// Constants associated with v1 of spreadsheet
+	PLAYERS_CELL         = "F4"
+	PLAYERS_ORG_OFFSET   = 1
+	PLAYERS_VAL_OFFSET   = 2
+	PLAYERS_BIDS_OFFSET  = 3
+	PLAYERS_PADDING_COLS = 4
+	STARTING_FUNDS_CELL  = "C2"
+	TEAMS_CELL           = "A4"
+	TEAMS_SPENT_OFFSET   = 2
 )
 
 type GoogleSheetsDb struct {
@@ -138,7 +146,10 @@ func (g *GoogleSheetsDb) ParseDraft(numMembers int) (models.DraftSnapshot, error
 	}
 
 	// 2) Get the players
-	ss.players = make(map[models.PlayerType][]Player)
+	ss.players, err = parsePlayers(resp, ss.teams)
+	if err != nil {
+		return nil, err
+	}
 
 	// extra logic just for shot-clock during draft.
 	ss.hotseat = interfaceToString(resp.Values[0][0])
