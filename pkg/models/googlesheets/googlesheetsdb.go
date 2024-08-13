@@ -30,6 +30,7 @@ type GoogleSheetsDb struct {
 	id      string // Sheet id
 	service *sheets.Service
 	title   string
+	etag    string // Determines if our data is fresh
 }
 
 func NewGoogleSheetsDb(bounds string, id string, service *sheets.Service, title string) *GoogleSheetsDb {
@@ -120,6 +121,7 @@ func (g *GoogleSheetsDb) ParseDraft(numMembers int) (models.DraftSnapshot, error
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 		return nil, err
 	}
+	g.etag = resp.ServerResponse.Header.Get("ETag")
 
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
@@ -161,9 +163,58 @@ func (g *GoogleSheetsDb) ParseDraft(numMembers int) (models.DraftSnapshot, error
 	return &ss, nil
 }
 
-func (g *GoogleSheetsDb) PlaceBid(models.Bid) error {
+func bidToCell(bid models.Bid) (string, error) {
+	// Each bid is applied to a single cell, which corresponds to the player cell, plus the offset
+	// for the team.  For now we assume that the team and player were originally populated using
+	// google sheets.  In the future, we would otherwise have to do a mapping somehow.
+	t, ok := bid.Bidder.(*Team)
+	if !ok {
+		return "", fmt.Errorf("Team %s associated with Bid did not come from googlesheets, unable to place bid in sheets.", bid.Bidder.Name())
+	}
+	p, ok := bid.Player.(*Player)
+	if !ok {
+		return "", fmt.Errorf("Player %s associated with Bid did not come from googlesheets, unable to place bid in sheets.", bid.Player.Name())
+	}
+
+	tsr, _, err := cellStrToIndices(TEAMS_CELL)
+	if err != nil {
+		return "", err
+	}
+	tr, _, err := cellStrToIndices(t.cell)
+	if err != nil {
+		return "", err
+	}
+	pr, pc, err := cellStrToIndices(p.cell)
+	if err != nil {
+		return "", err
+	}
+
+	// Calculate which team index this is: The team index corresponds to the number of rows after the 'team start' row.
+	ti := tr - tsr
+
+	// The bid cell is going to be the same row as the player, but column shifted to account for the team bid.
+	bc := pc + PLAYERS_BIDS_OFFSET + ti
+
+	// Defense has one column less due to not having an org column
+	if p.pt == models.D {
+		bc--
+	}
+	return indicesToCellStr(pr, bc), nil
+}
+
+func bidToValueRange(bid models.Bid) *sheets.ValueRange {
+	return nil
+}
+
+// Placing all bids at once allows us to avoid over-using the sheets API
+func (g *GoogleSheetsDb) PlaceBids(bids []models.Bid) error {
 	// Use the underlying sheet to place a bid, returning an error if it couldn't be placed.
 	return nil
+}
+
+func (g *GoogleSheetsDb) PlaceBid(bid models.Bid) error {
+	// Use the underlying sheet to place a bid, returning an error if it couldn't be placed.
+	return g.PlaceBids([]models.Bid{bid})
 }
 
 func parseTimes(vr *sheets.ValueRange) (map[string]time.Duration, error) {

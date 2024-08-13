@@ -1,6 +1,10 @@
 package googlesheets
 
-import "testing"
+import (
+	"testing"
+
+	"dcashman.net/coctaleague/pkg/models"
+)
 
 func Test_indicesToCellStr(t *testing.T) {
 	type input struct {
@@ -43,6 +47,49 @@ func Test_cellStrToIndices(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if row, col, err := cellStrToIndices(tt.in); err != nil || row != tt.want.row || col != tt.want.col {
 				t.Errorf("cellStrToIndices() = %d, %d, %v, want %d, %d, nil", row, col, err, tt.want.row, tt.want.col)
+			}
+		})
+	}
+}
+
+func Test_bidTocell(t *testing.T) {
+	tests := []struct {
+		name string
+		in   models.Bid
+		want string
+	}{
+		{
+			name: "bidToCell",
+			in: models.Bid{
+				Amount: 4,
+				Bidder: &Team{
+					cell: "A6",
+				},
+				Player: &Player{
+					cell: "F4",
+				},
+			},
+			want: "K4",
+		},
+		{
+			name: "bidToCell_D",
+			in: models.Bid{
+				Amount: 3,
+				Bidder: &Team{
+					cell: "A6",
+				},
+				Player: &Player{
+					pt:   models.D,
+					cell: "DG7",
+				},
+			},
+			want: "DK7",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, err := bidToCell(tt.in); err != nil || got != tt.want {
+				t.Errorf("bidToCell() = %s, want %s, err: %v", got, tt.want, err)
 			}
 		})
 	}
