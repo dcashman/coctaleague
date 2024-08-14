@@ -68,6 +68,7 @@ func NewBid(p Player, t Team, a int) Bid {
 
 type DraftStore interface {
 	PlaceBid(bid Bid) error
+	PlaceBids(bid []Bid) error
 
 	ParseDraft(numMembers int) (DraftSnapshot, error)
 	WriteShotclock(d time.Duration, td time.Duration, h map[string]time.Duration) error

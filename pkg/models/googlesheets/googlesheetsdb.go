@@ -202,18 +202,36 @@ func bidToCell(bid models.Bid) (string, error) {
 	return indicesToCellStr(pr, bc), nil
 }
 
-func bidToValueRange(bid models.Bid) *sheets.ValueRange {
-	return nil
-}
-
 // Placing all bids at once allows us to avoid over-using the sheets API
 func (g *GoogleSheetsDb) PlaceBids(bids []models.Bid) error {
 	// Use the underlying sheet to place a bid, returning an error if it couldn't be placed.
+	var valueRanges []*sheets.ValueRange
+	for _, b := range bids {
+		bc, err := bidToCell(b)
+		if err != nil {
+			return err
+		}
+		vr := sheets.ValueRange{
+			Range:  sheetsRange(g.title, bc),
+			Values: [][]interface{}{{b.Amount}},
+		}
+		valueRanges = append(valueRanges, &vr)
+	}
+
+	bu := &sheets.BatchUpdateValuesRequest{
+		Data:             valueRanges,
+		ValueInputOption: "RAW",
+	}
+
+	// Send the batch update request
+	_, err := g.service.Spreadsheets.Values.BatchUpdate(g.id, bu).Do()
+	if err != nil {
+		return fmt.Errorf("Unable to write bids to spreadsheet: %s", err.Error())
+	}
 	return nil
 }
 
 func (g *GoogleSheetsDb) PlaceBid(bid models.Bid) error {
-	// Use the underlying sheet to place a bid, returning an error if it couldn't be placed.
 	return g.PlaceBids([]models.Bid{bid})
 }
 
