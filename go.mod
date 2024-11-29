@@ -1,6 +1,6 @@
 module dcashman.net/coctaleague
 
-go 1.18
+go 1.21
 
 require (
 	github.com/golangcollege/sessions v1.2.0

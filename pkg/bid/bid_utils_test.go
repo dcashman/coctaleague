@@ -12,6 +12,7 @@ type minBidQuantityInput struct {
 	t  models.Team
 	pt models.PlayerType
 	s  Strategy
+	tc TeamComposition
 }
 
 func defaultMinBidQualityInput(pt models.PlayerType) minBidQuantityInput {
@@ -20,6 +21,7 @@ func defaultMinBidQualityInput(pt models.PlayerType) minBidQuantityInput {
 		t:  testutil.TestTeam01,
 		pt: pt,
 		s:  TestStrategy,
+		tc: TestTeamComposition,
 	}
 }
 
@@ -55,7 +57,7 @@ func TestMinBidQuantity(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		res := minBidQuantity(test.input.ds, test.input.t, test.input.pt, test.input.s)
+		res := minBidQuantity(test.input.ds, test.input.t, test.input.pt, test.input.s, test.input.tc)
 
 		if res != test.want {
 			t.Errorf("Expected result: %d but got %d for pos: %v", test.want, res, test.input.pt)
@@ -78,7 +80,7 @@ func TestMinBidAmount(t *testing.T) {
 }
 
 func TestPreemptiveBids(t *testing.T) {
-	res := preemptiveBids(testutil.TestDraftSnapshot, testutil.TestTeam01, TestStrategy)
+	res := preemptiveBids(testutil.TestDraftSnapshot, testutil.TestTeam01, TestStrategy, TestTeamComposition)
 	if len(res) != 9 {
 		t.Error("Expected a full 9 bids")
 	}
@@ -122,5 +124,44 @@ func TestPreemptiveBids(t *testing.T) {
 	if bidDist[models.K][0].Player != testutil.TestK01 {
 		t.Error("Expected K min bid to be for most valuable available plaeyr")
 	}
+}
+func TestExpandPlayerGroupsLen(t *testing.T) {
+	type input struct {
+		players []models.Player
+		size    int
+	}
+	var tests = []struct {
+		in   input
+		want int
+	}{
+		{
+			in: input{
+				players: testutil.QB_PLAYERS,
+				size:    2,
+			},
+			want: 3,
+		},
+		{
+			in: input{
+				players: testutil.RB_PLAYERS,
+				size:    3,
+			},
+			want: 4,
+		},
+		{
+			in: input{
+				players: testutil.RB_PLAYERS,
+				size:    2,
+			},
+			want: 6,
+		},
+	}
 
+	for _, test := range tests {
+		res := expandPlayerGroups(test.in.players, test.in.size)
+
+		if len(res) != test.want {
+			t.Errorf("Expected result: %d but got %d", test.want, len(res))
+		}
+	}
 }

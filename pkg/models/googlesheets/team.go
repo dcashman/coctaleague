@@ -14,8 +14,8 @@ type Team struct {
 	cell   string
 }
 
-func NewTeam(name string, funds int, cell string) Team {
-	return Team{
+func NewTeam(name string, funds int, cell string) *Team {
+	return &Team{
 		name:   name,
 		funds:  funds,
 		roster: make(map[models.PlayerType]map[models.Player]bool),
@@ -78,8 +78,8 @@ func (t *Team) RmPlayer(p models.Player) error {
 }
 
 // Parsing functions
-func parseTeams(vr *sheets.ValueRange, numTeams int, startingFunds int) ([]Team, error) {
-	var teams []Team
+func parseTeams(vr *sheets.ValueRange, numTeams int, startingFunds int) ([]*Team, error) {
+	var teams []*Team
 	v := vr.Values
 	// In the current version, we start the team list at row 4 in the first (A) column, with funds in col C
 	// Note: these funds are calculated by spreadsheet, we may want to check them against the total bids at the end of

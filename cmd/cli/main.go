@@ -181,11 +181,17 @@ func main() {
 		}
 
 		// TODO: Get from cmdline params.
-		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
+		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.OnePointMin}
 		err = draftDb.PlaceBids(bid.RecommendBids(snapshot, team, bidStrategy))
+		/*bids := bid.RecommendBids(snapshot, team, bidStrategy)
+		for _, b := range bids {
+			log.Printf("Team %s bidding %d for player %s", team.Name(), b.Amount, b.Player.Name())
+		} */
 		if err != nil {
 			log.Fatalf("Unable to place Bids: %s", err.Error())
 		}
+
+		log.Printf("Time to place bids: %s\n", time.Since(start))
 
 		if scData != nil {
 			hs := snapshot.Hotseat()

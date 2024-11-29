@@ -2,6 +2,8 @@ package bid
 
 import (
 	"math"
+	"slices"
+	"sort"
 
 	"dcashman.net/coctaleague/pkg/models"
 )
@@ -77,15 +79,52 @@ func CurrentBidder(snapshot models.DraftSnapshot) []models.Team {
 }
 
 func RecommendBids(snapshot models.DraftSnapshot, team models.Team, strategy Strategy) []models.Bid {
+	desiredComp := DesiredTeamComposition(snapshot, strategy)
 	// Get the preemptive bids out of the way first, since they don't affect our effective maximum bid
 	// amount, and if using non-1-pt preemptive bids, may change whether or not we are required to make
 	// a bid.
-	bids := preemptiveBids(snapshot, team, strategy)
+	preBids := preemptiveBids(snapshot, team, strategy, desiredComp)
 
-	// Calculate our next bid if required, for a 'real value' player.
-	// TODO: implement bid calculation logic.
+	// Now consider the 'full bids' we should make. These bids reflect us actively bidding for players in
+	// contention. Only make 'full bids' if it's our turn to do so, though.
+	if !slices.Contains(CurrentBidder(snapshot), team) {
+		return preBids
+	}
 
-	return bids
+
+	availableFunds := team.Funds()
+	for _, pb := range preBids {
+		availableFunds -= pb.Amount
+	}
+	fullBids := fullBids(snapshot, team, strategy, desiredComp, availableFunds)
+
+	if len(fullBids) == 0 {
+		return preBids
+	}
+
+	if strategy.Style == Style(FullTeam) {
+		// all aoll of the full bids
+		return append(preBids, fullBids...)
+	}
+	if strategy.Style == Style(Minimum) {
+		sort.Slice(fullBids, func(i, j int) bool {
+			return fullBids[i].Amount < fullBids[j].Amount
+		})
+		return append(preBids, fullBids[0])
+	}
+	if strategy.Style == Style(Value) {
+		sort.Slice(fullBids, func(i, j int) bool {
+			// Bids should always be greater-than-zero cost, so division here works.
+			iv := fullBids[i].Player.PredictedValue() / fullBids[i].Amount
+			jv := fullBids[j].Player.PredictedValue() / fullBids[j].Amount
+			// We want the greatest value first.
+			return iv > jv
+		})
+		return append(preBids, fullBids[0])
+	}
+
+	// We should not get here, but need a return statement, so just return preepmptive bids.
+	return preBids
 }
 
 // There is no 'right answer' in terms of the balance of starters vs. bench players and which positions.

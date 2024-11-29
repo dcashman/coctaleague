@@ -9,8 +9,8 @@ import (
 type GoogleSheetsSnapshot struct {
 	startingFunds int
 	lineupInfo    LineupInfo
-	teams         []Team
-	players       map[models.PlayerType][]Player
+	teams         []*Team
+	players       map[models.PlayerType][]*Player
 	hotseat       string
 	times         map[string]time.Duration
 }
@@ -22,7 +22,7 @@ func (g *GoogleSheetsSnapshot) StartingFunds() int {
 func (g *GoogleSheetsSnapshot) Teams() []models.Team {
 	s := make([]models.Team, len(g.teams))
 	for i := range g.teams {
-		s[i] = &g.teams[i]
+		s[i] = g.teams[i]
 	}
 
 	return s
@@ -37,7 +37,7 @@ func (g *GoogleSheetsSnapshot) Players() map[models.PlayerType][]models.Player {
 	for k, v := range g.players {
 		s := make([]models.Player, len(v))
 		for i := range v {
-			s[i] = &v[i]
+			s[i] = v[i]
 		}
 		retMap[k] = s
 	}
