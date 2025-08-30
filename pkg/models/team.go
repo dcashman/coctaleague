@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 // Type representing teams in our table.
 type Team interface {
 	Name() string
@@ -26,6 +28,7 @@ func rosterSize(t Team) int {
 	}
 	return sum
 }
+
 // Available funds for a team may contains some already spoken-for amounts, since there is a minimum
 // number of players required for each team. For example, if a team has drafted 9 of 16 players, then
 // bids must be made on the remaining 7 players, meaning 7 funds of the available (unspent) must be
@@ -38,7 +41,7 @@ func MaxBidValue(t Team, li LineupInfo) int {
 		return 0
 	}
 	if current > capacity {
-		panic("team already has more players than capacity allows")
+		panic(fmt.Sprintf("team %v already has more players than capacity allows", t.Name()))
 	}
 
 	slack := t.Funds() - (capacity - current)

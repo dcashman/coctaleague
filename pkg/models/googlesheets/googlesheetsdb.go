@@ -18,7 +18,7 @@ const (
 	PLAYERS_CELL         = "F4"
 	PLAYERS_ORG_OFFSET   = 1
 	PLAYERS_VAL_OFFSET   = 2
-	PLAYERS_BIDS_OFFSET  = 3
+	PLAYERS_BIDS_OFFSET  = 4 // 3 prior to 2025
 	PLAYERS_PADDING_COLS = 4
 	STARTING_FUNDS_CELL  = "C2"
 	TEAMS_CELL           = "A4"
@@ -121,7 +121,6 @@ func (g *GoogleSheetsDb) ParseDraft(numMembers int) (models.DraftSnapshot, error
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 		return nil, err
 	}
-	g.etag = resp.ServerResponse.Header.Get("ETag")
 
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")

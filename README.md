@@ -10,6 +10,7 @@ Attempt at putting the fantasy football bidding war draft into a real applicatio
 Connect to the database as the postgres superuser for your system, e.g. postgres, or dcashman:<br/>
 <code>sudo -u postgres psql</code><br/>
 <br/>
+Note: https://stackoverflow.com/questions/17633422/psql-fatal-database-user-does-not-exist <br/>
 Create the marketdraft DB and connect to it. <br/>
 <code>CREATE DATABASE marketdraft;</code><br/>
 <code>\c marketdraft;</code><br/>

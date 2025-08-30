@@ -140,7 +140,7 @@ func parsePlayers(vr *sheets.ValueRange, teams []*Team) (map[models.PlayerType][
 		return nil, fmt.Errorf("unable to get starting indices for player list at starting cell %s in spreasheet. %s", PLAYERS_CELL, err.Error())
 	}
 
-	posOffset := len(teams) + PLAYERS_PADDING_COLS + 3 // + 3 accounts for the player name, org and value columns
+	posOffset := len(teams) + PLAYERS_PADDING_COLS + PLAYERS_BIDS_OFFSET // Player bids offset accounts for the player name, org and value columns
 	for i, pt := range models.AllPlayerTypes {
 		players[pt], err = parsePlayersPos(vr, teams, row, col+(i*posOffset), pt)
 		if err != nil {
