@@ -97,7 +97,7 @@ func fullBids(snapshot models.DraftSnapshot, team models.Team, strategy Strategy
 	for _, pg := range pgs {
 		pg, ok := pg.(*playerGroup)
 		if ok {
-		bids = append(bids, pg.ToBids(team)...)
+			bids = append(bids, pg.ToBids(team)...)
 		} else {
 			panic("MultiChoiceKnapsack returned Item which is not an underlying playerGroup")
 		}
@@ -110,6 +110,7 @@ func minBids(snapshot models.DraftSnapshot, team models.Team, position models.Pl
 	bids := []models.Bid{}
 
 	//  Determine price to bid
+	// TODO: BUG: need to adjust if team has less $ available
 	minValue := minBidAmount(strategy)
 	numBids := minBidQuantity(snapshot, team, position, strategy, desiredComp)
 
@@ -156,6 +157,8 @@ func minBidQuantity(snapshot models.DraftSnapshot, team models.Team, position mo
 	if position == models.D || position == models.K {
 		minBidsForPosition += positionComp.Start
 	}
+
+	//TODO: BUG: need to ensure we have space on the team
 	playersNeeded := minBidsForPosition - currentMinBids
 	if playersNeeded > 0 {
 		return playersNeeded

@@ -5,7 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Package",
+            // Dev sheet only. Use this to sanity-check bid placement (especially
+            // that bids land in YOUR column) before running the PROD config.
+            // maxRuntime is in SECONDS: 300 = one 5-minute check.
+            "name": "Draft (dev sheet)",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -13,7 +16,32 @@
             "cwd": "${workspaceFolder}",
             "env": {},
             "args": [
-                "--username=Eric"
+                "--username=Dan",
+                "--minBidAmt=1",
+                "--numMembers=14",
+                "--sheetTitle=2026 Draft",
+                "--maxRuntime=300",
+                "--pollFreq=30"
+            ]
+        },
+        {
+            // LIVE. Writes real bids to the league sheet.
+            // maxRuntime is in SECONDS: 18000 = 5 hours.
+            "name": "Draft (PROD - writes real bids)",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/cli/main.go",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "--prod",
+                "--username=Dan",
+                "--minBidAmt=1",
+                "--numMembers=14",
+                "--sheetTitle=2026 Draft",
+                "--maxRuntime=18000",
+                "--pollFreq=30"
             ]
         }
     ]

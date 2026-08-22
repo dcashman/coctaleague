@@ -25,7 +25,7 @@ import (
 func getClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
-	// time.
+	// time
 	tokFile := "token.json"
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
@@ -96,6 +96,7 @@ func main() {
 	// Basic paremeters for the given season
 	var (
 		maxRuntime int
+		minBidAmt  int
 		numMembers int
 		pollFreq   int
 		prod       bool
@@ -106,11 +107,12 @@ func main() {
 	)
 
 	flag.IntVar(&numMembers, "numMembers", 14, "Number of members in the league")
+	flag.IntVar(&minBidAmt, "minBidAmt", 2, "Desired amount to spend on substitutes and K + D positions")
 	flag.IntVar(&maxRuntime, "maxRuntime", 30, "How long to run this program before we stop polling the draft server and making bids.")
 	flag.IntVar(&pollFreq, "pollFreq", 30, "How often, in seconds, to poll the draft server and check to see if we need to make a bid")
 	flag.StringVar(&username, "username", "Dan", "User for whom to place a bid")
 	flag.StringVar(&sheetRange, "range", "ED109", "Second value for range of cells in the spreadsheet, e.g. A1:DX103 should provide DX103. Program starts at A1 by default")
-	flag.StringVar(&sheetTitle, "sheetTitle", "2024 Draft", "The sheet to target, e.g. 2023 Draft")
+	flag.StringVar(&sheetTitle, "sheetTitle", "2026 Draft", "The sheet to target, e.g. 2023 Draft")
 	flag.BoolVar(&prod, "prod", false, "Whether or not to use the real sheet")
 	flag.StringVar(&scFile, "scFile", "", "File to record shot-clock time information")
 
@@ -137,8 +139,7 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
-	// TODO: Make this configurable dev vs. prod, right now only dev.
-	spreadsheetId := "18FwVz2qt9SRbIleVgTYGASpKyItov5q07Zdf046xeqQ"
+	spreadsheetId := "1QGr-uFNR7evvMct5Vwyv5Avzvs37-ATHGOnXQoCfVJQ"
 	if prod {
 		spreadsheetId = "1bzgEDvbHuntqp6FdJiMMg5rmjQ2b5N6pi0BjDy5R8vE"
 	}
@@ -180,8 +181,12 @@ func main() {
 			log.Fatalf("No such team with username: %v", err)
 		}
 
-		// TODO: Get from cmdline params.
-		bidStrategy := bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
+		var bidStrategy bid.Strategy
+		if minBidAmt == 1 {
+			bidStrategy = bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.OnePointMin}
+		} else {
+			bidStrategy = bid.Strategy{Style: bid.Value, Value: bid.Predicted, Preemptive: bid.TwoPointMin}
+		}
 		err = draftDb.PlaceBids(bid.RecommendBids(snapshot, team, bidStrategy))
 		/*bids := bid.RecommendBids(snapshot, team, bidStrategy)
 		for _, b := range bids {
